@@ -1,6 +1,6 @@
-# craft-debug skill
+# Craft Build Debugger
 
-An [agentskills](https://agentskills.io) skill for debugging failing builds of craft applications: snapcraft, charmcraft, rockcraft, debcraft, and imagecraft.
+An [agent skill](https://agentskills.io) for diagnosing and fixing failing snapcraft, charmcraft, and rockcraft builds.
 
 ## What it does
 
