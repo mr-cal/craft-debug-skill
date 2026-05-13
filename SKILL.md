@@ -15,11 +15,40 @@ Craft apps (snapcraft, charmcraft, rockcraft, debcraft, imagecraft) share a comm
 
 | App | Project file | Log path |
 |-----|-------------|----------|
-| snapcraft | `snap/snapcraft.yaml` or `snapcraft.yaml` | `~/.local/state/snapcraft/log/` |
+| snapcraft | `snap/snapcraft.yaml`, `snapcraft.yaml`, `.snapcraft.yaml`, or `build-aux/snap/snapcraft.yaml` | `~/.local/state/snapcraft/log/` |
 | charmcraft | `charmcraft.yaml` | `~/.local/state/charmcraft/log/` |
 | rockcraft | `rockcraft.yaml` | `~/.local/state/rockcraft/log/` |
 | debcraft | `debcraft.yaml` | `~/.local/state/debcraft/log/` |
 | imagecraft | `imagecraft.yaml` | `~/.local/state/imagecraft/log/` |
+
+## Build Provider
+
+By default, craft apps launch builds inside an **LXD container** or **Multipass VM**. Users may override this. If the default provider fails or the user mentions a specific provider, ask which one they are using.
+
+**Set the build provider:**
+```bash
+CRAFT_BUILD_ENVIRONMENT=lxd snapcraft pack
+CRAFT_BUILD_ENVIRONMENT=multipass snapcraft pack
+```
+
+**Build directly on the host (destructive mode):**
+```bash
+snapcraft pack --destructive-mode
+```
+
+> ⚠️ **Never use `--destructive-mode` unless the user explicitly asks for it.** It modifies the host system directly and bypasses build isolation.
+
+## Project File Schema
+
+Project file schemas are published on [SchemaStore](https://www.schemastore.org/). Use them to validate the project file and check required/optional keys.
+
+| App | Schema URL |
+|-----|-----------|
+| snapcraft | `https://raw.githubusercontent.com/canonical/snapcraft/main/schema/snapcraft.json` |
+| charmcraft | `https://raw.githubusercontent.com/canonical/charmcraft/main/schema/charmcraft.json` |
+| rockcraft | `https://raw.githubusercontent.com/canonical/rockcraft/main/schema/rockcraft.json` |
+
+When a YAML validation error is unclear, fetch the schema and check the key's definition.
 
 ## Build Lifecycle
 
@@ -132,7 +161,16 @@ After editing `snapcraft.yaml` (or equivalent), re-run from the failing step:
 snapcraft pack   # or the specific failing step
 ```
 
-## Common Error Patterns
+### 7. Final verification
+
+Once the build succeeds, do a clean rebuild to catch any state left over from debugging iterations:
+
+```bash
+snapcraft clean
+snapcraft pack
+```
+
+> ⚠️ **Only do this when confident the build is working.** On large projects, a full clean can take hours to re-download dependencies and recompile from scratch. For quick iteration, target specific parts instead.
 
 ### YAML validation errors (before any build)
 
@@ -222,7 +260,7 @@ parts:
 
 ## App-Specific Notes
 
-**snapcraft (snaps):** Uses LXD or Multipass VM by default. Use `--destructive-mode` to build directly on the host (faster, less isolated). Linters run at prime step.
+**snapcraft (snaps):** Uses LXD or Multipass VM by default (see Build Provider section). Linters run at prime step.
 
 **charmcraft (charms):** Uses `charm` plugin for Python-based charms. The `charmcraft pack` command creates a `.charm` file.
 
