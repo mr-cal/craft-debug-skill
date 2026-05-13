@@ -10,7 +10,7 @@ description: >
   skill regression testing, skill iteration, debug skill improvement.
 license: Apache-2.0
 metadata:
-  author: mr-cal
+  author: some-bot-e
   version: "1.1.0"
   summary: Evaluates a craft-debug skill version against failing snaps and query examples, then produces a refined craft-debug-vX skill.
   tags:
@@ -359,10 +359,6 @@ Still known gaps (deferred):
 ```
 
 ## References
-
-### references/test-cases.md
-
-Standard test case suite for craft-debug skills. Read this file before Step 2.
 
 ### references/evaluation-rubric.md
 
