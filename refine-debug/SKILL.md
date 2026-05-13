@@ -1,18 +1,18 @@
 ---
 name: refine-debug
 description: >
-  Refines an existing craft-debug skill by running it against a structured test suite,
-  evaluating the results, identifying gaps, and producing a new versioned skill file
-  (craft-debug-vX). Applies an iterative evaluation loop: test → score → identify gaps →
-  improve → re-test. Produces only a new versioned skill, never overwrites the previous one.
+  Refines the craft-debug skill by running it against a structured test suite,
+  evaluating the results, identifying gaps, improving the skill content, and overwriting
+  the original craft-debug skill (SKILL.md) with the improved version. Applies an
+  iterative evaluation loop: test → score → identify gaps → improve → re-test.
   WHEN: refine craft-debug skill, improve craft-debug, iterate on debug skill, test skill quality,
-  evaluate skill against test cases, create craft-debug-v2, create next version of craft-debug,
+  evaluate skill against test cases, fix failing craft-debug tests, update craft-debug skill,
   skill regression testing, skill iteration, debug skill improvement.
 license: Apache-2.0
 metadata:
   author: some-bot-e
-  version: "1.1.0"
-  summary: Evaluates a craft-debug skill version against failing snaps and query examples, then produces a refined craft-debug-vX skill.
+  version: "1.2.0"
+  summary: Evaluates the craft-debug skill against failing snaps and query examples, then overwrites the original craft-debug SKILL.md with the improved version.
   tags:
     - craft
     - debugging
@@ -24,33 +24,26 @@ metadata:
 
 ## Overview
 
-Refines an existing `craft-debug` skill version by running it against a structured set of
-test scenarios, scoring the results, identifying gaps, and writing a new versioned
-`craft-debug-vN` skill that addresses those gaps. **Never overwrites a previous version.**
+Refines the `craft-debug` skill by running it against a structured set of test scenarios,
+scoring the results, identifying gaps, and **overwriting the original `craft-debug` skill**
+(`SKILL.md` at the repository root) with an improved version that addresses those gaps.
 
 ## Workflow
 
-### Step 1 — Identify the current skill version
+### Step 1 — Load the current skill
 
-All skill versions live as sibling directories next to `refine-debug/` in the same repo:
+Read the current `craft-debug` skill from the repository root:
 
 ```
 craft-debug-skill/
-├── SKILL.md              ← v1 (the original)
+├── SKILL.md              ← craft-debug skill (will be overwritten)
 ├── refine-debug/         ← this skill
-├── eval/                 ← test data
-├── craft-debug-v2/       ← refined versions
-└── …
+└── eval/                 ← test data
 ```
-
-To find the latest version, list sibling directories:
 
 ```bash
-ls "$(dirname "$PWD")"
+cat SKILL.md
 ```
-
-Determine the current version number (from `metadata.version` in the latest skill's
-frontmatter). The output of this run will be `craft-debug-v(N+1)`.
 
 ### Step 2 — Load the test cases
 
@@ -84,6 +77,8 @@ eval/failing-snaps/
    ```
    <snap-name>: <lifecycle step that fails> — <root cause>
    ```
+
+**Do not skip any snaps.**
 
 ### Step 3 — Evaluate routing with query examples
 
@@ -134,63 +129,38 @@ For each gap, determine the fix:
 - `bad-trigger` → update the `description` WHEN clause to add the missing trigger phrase
 - `spec` → fix the frontmatter field
 
-### Step 7 — Scaffold the new version
+### Step 7 — Write the improved skill
 
-Determine the next version number (e.g., if current is `craft-debug-v2`, create `craft-debug-v3`).
+Use the current `SKILL.md` content as the starting point. Apply every planned fix and
+**overwrite** the original `craft-debug` skill at the repository root (`SKILL.md`).
 
-All versions live as subdirectories **alongside this skill** in the same repository root:
-
-```
-craft-debug-skill/
-├── SKILL.md              ← original v1 skill
-├── refine-debug/         ← this skill
-├── craft-debug-v2/       ← first refined version
-├── craft-debug-v3/       ← next refined version
-└── …
-```
-
-Scaffold into that directory:
-
-```bash
-python3 /root/.agents/skills/generate-agent-skills/scripts/scaffold_skill.py \
-  --name craft-debug-vN \
-  --output-dir "$(dirname "$PWD")"
-```
-
-If the scaffold script is not available, create the directory and SKILL.md directly at
-`<repo-root>/craft-debug-vN/SKILL.md`.
-
-**Never place the new version inside the `refine-debug/` directory itself.**
-
-### Step 8 — Write the refined skill
-
-Copy the previous version's SKILL.md as a starting point, then apply every planned fix.
 Follow these rules:
-- Preserve all passing content from the previous version.
+- Preserve all passing content from the current skill.
 - Add new sections immediately after the most relevant existing section.
 - Keep SKILL.md under 500 lines; move large tables or examples to `references/`.
-- Update `metadata.version` to the new version number.
+- Increment `metadata.version` in the frontmatter.
 
-### Step 9 — Validate and re-test
+**Do not create a new versioned directory.** Write the result directly to `SKILL.md`.
 
-Run the validator:
+### Step 8 — Validate and re-test
+
+Run the validator (bundled with this skill):
 
 ```bash
-python3 /root/.agents/skills/generate-agent-skills/scripts/validate_skill.py \
-  --path <path-to-new-skill>
+python3 refine-debug/scripts/validate_skill.py --path .
 ```
 
-Fix any reported errors. Then re-run the full test suite (Steps 3–4) against the new
+Fix any reported errors. Then re-run the full test suite (Steps 3–4) against the updated
 skill and confirm every previously failing test now passes (or is explicitly deferred
 with a rationale).
 
-### Step 10 — Summarise the changes
+### Step 9 — Summarise the changes
 
 Output a brief changelog:
 
 ```
-craft-debug-vN — Changes from vN-1
------------------------------------
+craft-debug — Changes in this refinement
+-----------------------------------------
 Fixed:
   - G1: <description>
   - G2: <description>
@@ -204,162 +174,3 @@ Still known gaps (deferred):
 ### references/evaluation-rubric.md
 
 Scoring criteria for each test case response. Read this before Step 4.
-
-
-# Refine Debug
-
-## Overview
-
-Refines an existing `craft-debug` skill version by running it against a structured set of
-test scenarios, scoring the results, identifying gaps, and writing a new versioned
-`craft-debug-vN` skill that addresses those gaps. **Never overwrites a previous version.**
-
-## Workflow
-
-### Step 1 — Identify the current skill version
-
-All skill versions live as sibling directories next to `refine-debug/` in the same repo:
-
-```
-craft-debug-skill/
-├── SKILL.md              ← v1 (the original)
-├── refine-debug/         ← this skill
-├── craft-debug-v2/       ← refined versions
-└── …
-```
-
-To find the latest version, list sibling directories:
-
-```bash
-ls "$(dirname "$PWD")"
-```
-
-### Step 2 — Load the test cases
-
-If the user specifies a test case directory, use that. Otherwise default to the
-`failing-snaps/` directory that lives alongside this skill in the repo root.
-
-**Directory structure of `failing-snaps/`:**
-
-```
-failing-snaps/
-├── README.md
-├── <snap-name>/
-│   └── snap/
-│       └── snapcraft.yaml   ← the project file under test
-│   └── src/                 ← optional local source
-└── …
-```
-
-**To load the test cases:**
-
-1. List all entries in the test case directory:
-   ```bash
-   ls failing-snaps/
-   ```
-2. For each entry (skip `README.md`), read `<entry>/snap/snapcraft.yaml`.
-3. Inspect the YAML to infer the **intended failure mode** — look for:
-   - Missing required fields (e.g. no `version`, no `base`)
-   - Scriptlets that are designed to fail (`override-pull: exit 1`, `craftctl` misuse)
-   - Packages, plugins, or source references that would fail at a specific lifecycle step
-   - Platform/architecture constraints that can't be satisfied
-   - Invalid field values (e.g. `license: boo-license`)
-4. For each snap, write a one-line failure summary:
-   ```
-   <snap-name>: <step that fails> — <root cause>
-   ```
-
-**Do not skip any entries.** Use all snaps in the directory as test cases.
-
-### Step 3 — Compile gaps
-
-After all test cases, list every gap found:
-
-| Gap ID | Test case | Symptom | Category |
-|--------|-----------|---------|----------|
-| G1     | …         | …       | missing-content / unclear-steps / bad-trigger / spec |
-
-Categories:
-- `missing-content` — a common scenario has no matching guidance
-- `unclear-steps` — instructions exist but are ambiguous or incomplete
-- `bad-trigger` — the skill description wouldn't route to this scenario
-- `spec` — frontmatter is non-compliant (missing fields, bad format)
-
-### Step 4 — Plan the improvements
-
-For each gap, determine the fix:
-
-- `missing-content` → add a new section or extend an existing one
-- `unclear-steps` → rewrite the affected step with concrete commands/examples
-- `bad-trigger` → update the `description` WHEN clause to add the missing trigger phrase
-- `spec` → fix the frontmatter field
-
-### Step 5 — Scaffold the new version
-
-Determine the next version number (e.g., if current is `craft-debug-v2`, create `craft-debug-v3`).
-
-All versions live as subdirectories **alongside this skill** in the same repository root:
-
-```
-craft-debug-skill/
-├── SKILL.md              ← original v1 skill
-├── refine-debug/         ← this skill
-├── craft-debug-v2/       ← first refined version
-├── craft-debug-v3/       ← next refined version
-└── …
-```
-
-Scaffold into that directory:
-
-```bash
-python3 /root/.agents/skills/generate-agent-skills/scripts/scaffold_skill.py \
-  --name craft-debug-vN \
-  --output-dir "$(dirname "$(dirname "$0")")"
-```
-
-If the scaffold script is not available, create the directory and SKILL.md directly at
-`<repo-root>/craft-debug-vN/SKILL.md`.
-
-**Never place the new version inside the `refine-debug/` directory itself.**
-
-### Step 6 — Write the refined skill
-
-Copy the previous version's SKILL.md as a starting point, then apply every planned fix.
-Follow these rules:
-- Preserve all passing content from the previous version.
-- Add new sections immediately after the most relevant existing section.
-- Keep SKILL.md under 500 lines; move large tables or examples to `references/`.
-- Update `metadata.version` to the new version number.
-
-### Step 7 — Validate and re-test
-
-Run the validator:
-
-```bash
-python3 /root/.agents/skills/generate-agent-skills/scripts/validate_skill.py \
-  --path <path-to-new-skill>
-```
-
-Fix any reported errors. Then re-run the full test suite against the new skill and confirm
-every previously failing test now passes (or is explicitly deferred with a rationale).
-
-### Step 8 — Summarise the changes
-
-Output a brief changelog:
-
-```
-craft-debug-vN — Changes from vN-1
------------------------------------
-Fixed:
-  - G1: <description>
-  - G2: <description>
-
-Still known gaps (deferred):
-  - <description> — reason: <rationale>
-```
-
-## References
-
-### references/evaluation-rubric.md
-
-Scoring criteria for each test case response. Read this before Step 2.
