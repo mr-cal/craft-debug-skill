@@ -31,6 +31,7 @@ Log paths follow `~/.local/state/<app>/log/`. Project files follow `<app>.yaml`,
 - **Build state is cached between runs.** A part that succeeded previously won't re-run unless cleaned. This is usually good but can leave stale state during debugging. Do a final `clean` + `pack` once the build is confirmed working.
 - **The overlay step is only present in some apps** (e.g. rockcraft). Running `snapcraft overlay` will error.
 - **Never use `--destructive-mode` unless the user explicitly asks.** It modifies the host system directly and bypasses build isolation.
+- **Fix craft config, not source code.** Resolve failures by editing the craft YAML or craft-specific assets (e.g. `snap/hooks/`). Do **not** modify upstream source code. If the failure is clearly a bug in the source itself (i.e. it would fail to build outside of any craft context), tell the user what you found and ask whether they would like you to fix the source.
 
 ## Build Provider
 
