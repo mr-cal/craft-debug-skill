@@ -1,0 +1,254 @@
+---
+name: craft-debug
+description: Use when debugging failing builds of craft applications (snapcraft, charmcraft, rockcraft, debcraft, imagecraft), when a pack/build command errors, or when iterating on a project file to fix build failures.
+---
+
+# Debugging Craft App Builds
+
+## Overview
+
+Craft apps (snapcraft, charmcraft, rockcraft, debcraft, imagecraft) share a common build framework. Use this skill to diagnose failures, iterate efficiently, and get to a successful pack.
+
+**Core principle:** Work through the build lifecycle step-by-step, using craft's built-in debug flags to narrow down the failing step, then fix and re-run.
+
+## Quick Reference
+
+| App | Project file | Log path |
+|-----|-------------|----------|
+| snapcraft | `snap/snapcraft.yaml` or `snapcraft.yaml` | `~/.local/state/snapcraft/log/` |
+| charmcraft | `charmcraft.yaml` | `~/.local/state/charmcraft/log/` |
+| rockcraft | `rockcraft.yaml` | `~/.local/state/rockcraft/log/` |
+| debcraft | `debcraft.yaml` | `~/.local/state/debcraft/log/` |
+| imagecraft | `imagecraft.yaml` | `~/.local/state/imagecraft/log/` |
+
+## Build Lifecycle
+
+All craft apps share this lifecycle (in order):
+
+```
+pull → build → stage → prime → pack
+```
+
+Each step command runs all prior steps automatically:
+- `<app> pull [part-name]` — fetch sources
+- `<app> build [part-name]` — compile/build
+- `<app> stage [part-name]` — collect into staging area
+- `<app> prime [part-name]` — prepare final contents
+- `<app> pack` — create final artifact
+
+## Debugging Workflow
+
+### 1. Identify the failing step
+
+Run the full pack and read the error carefully:
+
+```bash
+snapcraft pack 2>&1 | tee /tmp/craft-build.log
+```
+
+The error message names the **step** (pull/build/stage/prime/pack) and **part** that failed.
+
+### 2. Read the detailed log
+
+The last log file contains full output including environment details:
+
+```bash
+ls -t ~/.local/state/snapcraft/log/ | head -1 | xargs -I{} cat ~/.local/state/snapcraft/log/{}
+```
+
+(Replace `snapcraft` with your app name.)
+
+### 3. Inspect the project file
+
+```bash
+cat snapcraft.yaml        # or rockcraft.yaml, charmcraft.yaml, etc.
+```
+
+Check:
+- `parts:` — names, plugins, source, build-packages, stage-packages
+- `base:` — Ubuntu version used for build environment
+- `platforms:` — target architectures
+
+### 4. Use debug flags to iterate faster
+
+These flags are available on all lifecycle step commands:
+
+| Flag | When to use |
+|------|-------------|
+| `--shell` | Drop into a shell BEFORE the failing step |
+| `--shell-after` | Drop into a shell AFTER a step completes |
+| `--debug` | Drop into a shell automatically ON failure |
+
+**Examples:**
+
+```bash
+# Drop into shell before prime (after stage), inspect staging area
+snapcraft prime --shell
+
+# Run build and then inspect the build environment
+snapcraft build my-part --shell-after
+
+# Run pack; if it fails, drops into a shell at the failure point
+snapcraft pack --debug
+```
+
+Inside the shell you can:
+- Inspect file layout (`ls`, `find`)
+- Check environment variables (see below)
+- Test missing binaries or libraries
+- Edit the project file outside the shell and re-run `snapcraft` inside it
+
+**Key environment variables inside the debug shell:**
+
+| Variable | Points to |
+|----------|-----------|
+| `$CRAFT_PART_SRC` | Pulled source code |
+| `$CRAFT_PART_BUILD` | Build working directory |
+| `$CRAFT_PART_INSTALL` | Where built files are installed (staged from here) |
+| `$CRAFT_STAGE` | The staging area (all parts combined) |
+| `$CRAFT_PRIME` | The prime area (final artifact contents) |
+
+### 5. Build or clean specific parts
+
+To speed up iteration, target specific parts instead of rebuilding everything:
+
+```bash
+# Rebuild only the failing part
+snapcraft build my-part
+
+# Clean only a specific part and rebuild it
+snapcraft clean my-part
+snapcraft build my-part
+
+# Clean everything and start fresh
+snapcraft clean
+```
+
+### 6. Fix and re-run
+
+After editing `snapcraft.yaml` (or equivalent), re-run from the failing step:
+
+```bash
+snapcraft pack   # or the specific failing step
+```
+
+## Common Error Patterns
+
+### YAML validation errors (before any build)
+
+```
+Issues while validating snapcraft.yaml: 'version' is a required property
+```
+
+**Fix:** Check required keys. `version` is required unless using `adopt-info`. Validate YAML syntax.
+
+### Missing build dependency (build step)
+
+```
+Package libfoo-dev was not found in the pkg-config search path
+```
+
+**Fix:** Add to `build-packages` in the failing part:
+```yaml
+parts:
+  my-part:
+    build-packages:
+      - libfoo-dev
+```
+
+### Missing runtime library (stage/prime step)
+
+```
+Unable to find library: libfoo.so.1
+```
+
+**Fix:** Add to `stage-packages` in the failing part:
+```yaml
+parts:
+  my-part:
+    stage-packages:
+      - libfoo1
+```
+
+### `override-build` / scriptlet command failure
+
+```
++ not-a-real-command
+not-a-real-command: command not found
+```
+
+**Fix:** Check the `override-build`, `override-pull`, or `override-prime` scriptlet in the part. The failing command must be installed (add it to `build-packages`) or corrected.
+
+### adopt-info missing parse-info (prime step)
+
+```
+Failed to generate snap metadata: 'adopt-info' refers to part 'mypart', but that part is lacking the 'parse-info' property
+```
+
+**Fix:** Add `parse-info` to the part, or use `craftctl set-version` in an override scriptlet.
+
+### Library linter warnings (prime step)
+
+```
+Lint warnings:
+- library: libfoo.so.1: unused library
+```
+
+**Fix options:**
+- Remove from `stage-packages` if truly unused
+- If dynamically loaded, add to `lint.ignore` to suppress false positive:
+```yaml
+lint:
+  ignore:
+    - library: libfoo.so.1
+```
+
+### Parts lifecycle ordering
+
+If part A needs files from part B during build, use `after`:
+```yaml
+parts:
+  part-a:
+    after:
+      - part-b
+```
+
+## Speeding Up Iterations
+
+1. **Target the failing part:** `snapcraft build failing-part` not `snapcraft pack`
+2. **Use `--shell`/`--debug`** to inspect environment without full rebuilds
+3. **Clean only what changed:** `snapcraft clean failing-part` to invalidate just one part
+4. **Fix YAML errors first** — the app validates the project file before any build steps
+
+## App-Specific Notes
+
+**snapcraft (snaps):** Uses LXD or Multipass VM by default. Use `--destructive-mode` to build directly on the host (faster, less isolated). Linters run at prime step.
+
+**charmcraft (charms):** Uses `charm` plugin for Python-based charms. The `charmcraft pack` command creates a `.charm` file.
+
+**rockcraft (OCI rocks):** Creates OCI images. Uses `ubuntu@XX.YY` base format. Output is a `.rock` file (OCI archive).
+
+**debcraft (deb packages):** Creates Debian packages. Project file is `debcraft.yaml`.
+
+**imagecraft:** Creates Ubuntu images. Inherits the same lifecycle and flags.
+
+## Example Iteration Session
+
+```bash
+# 1. See what's failing
+snapcraft pack --debug
+# (shell opens at failure point)
+
+# 2. Inside the shell: inspect
+ls $CRAFT_PART_BUILD
+find $CRAFT_STAGE -name "*.so*"
+
+# 3. Exit shell, fix snapcraft.yaml
+# (edit in another terminal)
+
+# 4. Clean just the failing part
+snapcraft clean my-part
+
+# 5. Re-run
+snapcraft pack
+```
