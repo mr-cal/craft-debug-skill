@@ -1,0 +1,19 @@
+name: env-interpolation
+version: "1.0"
+summary: Rock with environment variable interpolation
+description: |
+  Environment variable interpolation ($VAR) is not supported in the
+  environment field. Error: "String interpolation not allowed for: $HOME/app"
+
+base: ubuntu@24.04
+
+platforms:
+  amd64:
+
+environment:
+  APP_PATH: "$HOME/app"
+  DATA_DIR: "/data"
+
+parts:
+  app:
+    plugin: nil

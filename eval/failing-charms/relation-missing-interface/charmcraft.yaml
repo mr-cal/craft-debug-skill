@@ -1,0 +1,16 @@
+name: relation-missing-interface
+type: charm
+summary: Charm with relation endpoint missing interface
+description: |
+  This charm defines a relation but forgets the interface field.
+
+base: ubuntu@24.04
+
+parts:
+  charm:
+    plugin: charm
+    source: .
+
+provides:
+  database:
+    description: Provides database access

@@ -1,0 +1,13 @@
+name: duplicate-metadata-field
+type: charm
+summary: Charm with summary in two places
+description: |
+  Summary is defined in both charmcraft.yaml and metadata.yaml.
+  Error: "Fields in charmcraft.yaml cannot be duplicated in metadata.yaml"
+
+base: ubuntu@24.04
+
+parts:
+  charm:
+    plugin: charm
+    source: .

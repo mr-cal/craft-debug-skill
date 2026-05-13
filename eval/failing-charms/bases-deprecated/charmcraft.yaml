@@ -1,0 +1,15 @@
+name: bases-deprecated
+type: charm
+summary: Charm using deprecated bases syntax
+description: |
+  This charm mixes the deprecated bases: syntax with the new base: field.
+
+base: ubuntu@24.04
+bases:
+  - name: ubuntu
+    channel: "22.04"
+
+parts:
+  charm:
+    plugin: charm
+    source: .

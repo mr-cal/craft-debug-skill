@@ -1,0 +1,20 @@
+name: pebble-bad-startup
+version: "1.0"
+summary: Rock with an invalid pebble startup value
+description: |
+  This rock uses an invalid value for the service startup field.
+
+base: ubuntu@24.04
+
+platforms:
+  amd64:
+
+services:
+  my-service:
+    override: replace
+    command: /bin/true
+    startup: invalid-value
+
+parts:
+  my-part:
+    plugin: nil

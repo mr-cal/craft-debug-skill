@@ -1,0 +1,19 @@
+name: legacy-env-vars
+version: "1.0"
+summary: Rock using non-existent ROCKCRAFT_* environment variables
+description: |
+  This rock mistakenly uses ROCKCRAFT_* variables (which don't exist)
+  instead of the correct CRAFT_* variables.
+
+base: ubuntu@24.04
+
+platforms:
+  amd64:
+
+parts:
+  my-part:
+    plugin: nil
+    override-build: |
+      echo "Project version: $ROCKCRAFT_PROJECT_VERSION"
+      echo "Part source: $ROCKCRAFT_PART_SRC"
+      craftctl default

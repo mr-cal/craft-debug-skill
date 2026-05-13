@@ -1,0 +1,22 @@
+name: naming-convention-mixed
+type: charm
+summary: Charm with mixed naming conventions
+description: |
+  Config options mix snake_case (log_level) with kebab-case (max-connections).
+  Linter warning: "Some config-options (log_level) are in snake case, while others (max-connections) are with hyphens."
+
+base: ubuntu@24.04
+
+parts:
+  charm:
+    plugin: charm
+    source: .
+
+config:
+  options:
+    log_level:
+      type: string
+      default: info
+    max-connections:
+      type: int
+      default: 100

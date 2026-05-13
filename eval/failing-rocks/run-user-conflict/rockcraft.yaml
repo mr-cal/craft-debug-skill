@@ -1,0 +1,28 @@
+name: run-user-conflict
+version: "1.0"
+summary: Rock with run-user that can't access root-owned files
+description: |
+  This rock runs as _daemon_ but installs files only readable by root.
+
+base: ubuntu@24.04
+run-user: _daemon_
+
+platforms:
+  amd64:
+
+services:
+  my-service:
+    override: replace
+    command: /app/secret-config
+    startup: enabled
+
+parts:
+  secret-files:
+    plugin: dump
+    source: .
+    organize:
+      rockcraft.yaml: app/secret-config
+    override-prime: |
+      craftctl default
+      chmod 600 $CRAFT_PRIME/app/secret-config
+      chown root:root $CRAFT_PRIME/app/secret-config

@@ -1,0 +1,20 @@
+name: multiarch-test
+version: "1.0"
+summary: Package with multi-arch conflict
+description: |
+  Setting multi_arch: same with architectures: all doesn't make sense.
+  multi_arch: same means the package can coexist in multiple arch,
+  but arch: all means it's architecture-independent (one package for all).
+
+maintainer: Test User <test@example.com>
+
+packages:
+  multiarch-test:
+    architectures: all
+    multi_arch: same
+    summary: Conflicting arch settings
+
+parts:
+  my-app:
+    plugin: nil
+    source: .

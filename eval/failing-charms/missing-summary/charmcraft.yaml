@@ -1,0 +1,11 @@
+name: missing-summary
+type: charm
+description: |
+  A charm that is missing the required summary field.
+
+base: ubuntu@24.04
+
+parts:
+  charm:
+    plugin: charm
+    source: .

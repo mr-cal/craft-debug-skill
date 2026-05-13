@@ -1,0 +1,16 @@
+name: platform-arm-only
+version: "1.0"
+summary: Rock that only builds on arm64
+description: |
+  This rock only defines arm64 platform, so it won't build on amd64 hosts.
+
+base: ubuntu@24.04
+
+platforms:
+  arm64:
+    build-on: [arm64]
+    build-for: [arm64]
+
+parts:
+  my-part:
+    plugin: nil

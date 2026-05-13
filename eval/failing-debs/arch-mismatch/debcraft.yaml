@@ -1,0 +1,16 @@
+name: arch-mismatch
+version: "1.0"
+summary: Package with architecture mismatch
+description: |
+  This package only builds on arm64 but we're on amd64.
+
+maintainer: Test User <test@example.com>
+
+platforms:
+  arm64:
+    build-on: [arm64]
+    build-for: [arm64]
+
+parts:
+  my-part:
+    plugin: nil

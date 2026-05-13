@@ -1,0 +1,12 @@
+name: bad-priority
+version: "1.0"
+summary: Package with invalid priority
+description: |
+  Priority must be: required, important, standard, or optional.
+
+maintainer: Test User <test@example.com>
+priority: critical
+
+parts:
+  my-part:
+    plugin: nil

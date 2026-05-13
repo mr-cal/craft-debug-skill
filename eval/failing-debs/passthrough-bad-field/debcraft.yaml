@@ -1,0 +1,16 @@
+name: passthrough-test
+version: "1.0"
+summary: Package with passthrough that conflicts
+description: |
+  Using passthrough to set a field that is already handled by debcraft.
+  This can cause duplicates or conflicts in the generated control file.
+
+maintainer: Test User <test@example.com>
+
+passthrough:
+  Maintainer: Different Person <other@example.com>
+
+parts:
+  my-app:
+    plugin: nil
+    source: .

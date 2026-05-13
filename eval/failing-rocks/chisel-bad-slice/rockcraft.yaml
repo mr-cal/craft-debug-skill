@@ -1,0 +1,16 @@
+name: chisel-bad-slice
+version: "1.0"
+summary: Rock with an invalid chisel slice reference
+description: |
+  This rock references a chisel slice that doesn't exist.
+
+base: ubuntu@24.04
+
+platforms:
+  amd64:
+
+parts:
+  my-part:
+    plugin: nil
+    stage-packages:
+      - libc6_nonexistent-slice

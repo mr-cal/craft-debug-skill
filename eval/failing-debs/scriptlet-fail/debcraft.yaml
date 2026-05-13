@@ -1,0 +1,14 @@
+name: scriptlet-fail
+version: "1.0"
+summary: Package with failing scriptlet
+description: |
+  This package has an override-build that exits with error.
+
+maintainer: Test User <test@example.com>
+
+parts:
+  my-part:
+    plugin: nil
+    override-build: |
+      echo "About to fail"
+      exit 1

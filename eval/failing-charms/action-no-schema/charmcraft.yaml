@@ -1,0 +1,16 @@
+name: action-no-schema
+type: charm
+summary: Charm with actions but no actions.yaml
+description: |
+  This charm references actions but the actions.yaml file is missing.
+
+base: ubuntu@24.04
+
+parts:
+  charm:
+    plugin: charm
+    source: .
+
+actions:
+  backup:
+    description: Back up the database

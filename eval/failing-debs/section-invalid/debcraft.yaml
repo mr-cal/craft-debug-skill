@@ -1,0 +1,12 @@
+name: section-invalid
+version: "1.0"
+summary: Package with nonstandard section
+description: |
+  Using a non-standard section may cause lintian warnings.
+
+maintainer: Test User <test@example.com>
+section: my-custom-section
+
+parts:
+  my-part:
+    plugin: nil

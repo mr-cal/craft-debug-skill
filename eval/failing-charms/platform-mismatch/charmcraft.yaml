@@ -1,0 +1,16 @@
+name: platform-mismatch
+type: charm
+summary: Charm that only builds on arm64
+description: |
+  This charm only defines arm64 platform.
+
+base: ubuntu@24.04
+platforms:
+  arm64:
+    build-on: [arm64]
+    build-for: [arm64]
+
+parts:
+  charm:
+    plugin: charm
+    source: .

@@ -1,0 +1,11 @@
+name: Invalid_Package_Name
+version: "1.0"
+summary: Package with invalid name
+description: |
+  Package names must match ^[a-z0-9][a-z0-9.+-]+$
+
+maintainer: Test User <test@example.com>
+
+parts:
+  my-part:
+    plugin: nil

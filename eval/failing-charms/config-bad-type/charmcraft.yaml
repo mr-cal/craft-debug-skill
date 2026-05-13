@@ -1,0 +1,19 @@
+name: config-bad-type
+type: charm
+summary: Charm with invalid config option type
+description: |
+  This charm defines a config option with an invalid type.
+
+base: ubuntu@24.04
+
+parts:
+  charm:
+    plugin: charm
+    source: .
+
+config:
+  options:
+    port:
+      type: number
+      default: 8080
+      description: The port to listen on

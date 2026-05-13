@@ -1,0 +1,7 @@
+name: missing-parts
+version: "1.0"
+summary: Package without parts
+description: |
+  This package is missing the required parts field.
+
+maintainer: Test User <test@example.com>

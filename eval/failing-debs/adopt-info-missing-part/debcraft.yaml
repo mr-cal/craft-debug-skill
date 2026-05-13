@@ -1,0 +1,14 @@
+name: adopt-info-test
+version: "1.0"
+summary: Package with adopt-info referencing missing part
+description: |
+  The adopt-info field references a part that doesn't exist.
+  Error: "'adopt-info' field must refer to the name of a part."
+
+maintainer: Test User <test@example.com>
+adopt-info: nonexistent-part
+
+parts:
+  my-app:
+    plugin: nil
+    source: .

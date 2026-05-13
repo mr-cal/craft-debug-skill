@@ -1,0 +1,14 @@
+name: invalid-base
+version: "1.0"
+summary: Rock with an invalid base image
+description: |
+  This rock specifies a base that doesn't exist.
+
+base: ubuntu@99.04
+
+platforms:
+  amd64:
+
+parts:
+  my-part:
+    plugin: nil

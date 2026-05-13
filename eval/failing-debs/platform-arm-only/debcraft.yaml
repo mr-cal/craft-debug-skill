@@ -1,0 +1,16 @@
+name: platform-arm-only
+version: "1.0"
+summary: Package that only builds on arm64
+description: |
+  This package only defines arm64 platform.
+
+maintainer: Test User <test@example.com>
+
+platforms:
+  arm64:
+    build-on: [arm64]
+    build-for: [arm64]
+
+parts:
+  my-part:
+    plugin: nil

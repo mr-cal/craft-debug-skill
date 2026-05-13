@@ -1,0 +1,14 @@
+name: ops-import-fail
+type: charm
+summary: Charm with broken Python import
+description: |
+  This charm imports a module that doesn't exist.
+
+base: ubuntu@24.04
+
+parts:
+  charm:
+    plugin: charm
+    source: .
+    charm-python-packages:
+      - nonexistent-package-xyz

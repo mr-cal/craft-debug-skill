@@ -1,0 +1,17 @@
+name: overlay-scriptlet-fail
+version: "1.0"
+summary: Rock with a failing overlay scriptlet
+description: |
+  This rock has an override-overlay scriptlet that exits with an error.
+
+base: ubuntu@24.04
+
+platforms:
+  amd64:
+
+parts:
+  my-part:
+    plugin: nil
+    override-overlay: |
+      echo "About to fail in overlay step"
+      exit 1

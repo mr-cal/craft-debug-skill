@@ -1,0 +1,13 @@
+name: ops-main-missing
+type: charm
+summary: Charm that never calls ops.main()
+description: |
+  The charm imports ops but forgets to call ops.main(CharmClass).
+  Linter error: "The ops.main() call missing from 'src/charm.py'."
+
+base: ubuntu@24.04
+
+parts:
+  charm:
+    plugin: charm
+    source: .

@@ -1,0 +1,30 @@
+name: check-multiple-types
+version: "1.0"
+summary: Rock with health check having multiple types
+description: |
+  Each Pebble check must have exactly one type (http, tcp, or exec).
+  This check defines both http and tcp.
+  Error: "Multiple check types specified (http, tcp). Each check must have exactly one type."
+
+base: ubuntu@24.04
+
+platforms:
+  amd64:
+
+checks:
+  health:
+    override: replace
+    http:
+      url: http://localhost:8080/health
+    tcp:
+      port: 8080
+
+services:
+  web:
+    override: replace
+    command: /app/server
+    startup: enabled
+
+parts:
+  app:
+    plugin: nil

@@ -1,0 +1,19 @@
+name: bare-with-overlay
+version: "1.0"
+summary: Rock using bare base with overlay
+description: |
+  Using overlays with base: bare is not allowed because there is no
+  filesystem to overlay. Error: "Part 'my-part' cannot use overlays with
+  a 'bare' base (there is no system to overlay)."
+
+base: bare
+build-base: ubuntu@24.04
+
+platforms:
+  amd64:
+
+parts:
+  my-part:
+    plugin: nil
+    overlay-packages:
+      - curl
