@@ -1,0 +1,18 @@
+name: build-on-no-match
+version: "1.0"
+summary: test
+description: |
+  Snap with platform definitions targeting arm64 and armhf architectures.
+confinement: strict
+base: core24
+platforms:
+  platform1:
+    build-on: arm64
+    build-for: arm64
+  platform2:
+    build-on: armhf
+    build-for: armhf
+
+parts:
+  nil:
+    plugin: nil

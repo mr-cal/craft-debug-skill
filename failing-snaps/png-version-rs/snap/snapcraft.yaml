@@ -1,0 +1,23 @@
+name: png-version-rs
+base: core24
+version: "0.1.0"
+summary: Print the libpng runtime version used by the binary
+description: |
+  A tiny Rust utility that prints the libpng runtime version number.
+
+grade: devel
+confinement: strict
+
+parts:
+  png-version-rs:
+    plugin: rust
+    source: src
+    build-packages:
+      - cargo
+      - gcc
+    stage-packages:
+      - libpng16-16
+
+apps:
+  png-version-rs:
+    command: bin/png-version-rs

@@ -1,0 +1,14 @@
+name: exit1
+version: "0.1"
+summary: Single-line elevator pitch for your amazing snap
+description: |
+  This snap uses an override-pull script that exits early.
+
+grade: devel
+base: core22
+confinement: devmode
+
+parts:
+  test:
+    plugin: nil
+    override-pull: exit 1

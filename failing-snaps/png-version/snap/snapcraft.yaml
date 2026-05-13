@@ -1,0 +1,22 @@
+name: png-version
+base: core24
+version: "1.0"
+summary: Print the libpng version the binary was linked against
+description: |
+  A tiny utility that prints the libpng version it was built against.
+
+grade: devel
+confinement: strict
+
+parts:
+  png-version:
+    plugin: make
+    source: src
+    build-packages:
+      - gcc
+    stage-packages:
+      - libpng16-16
+
+apps:
+  png-version:
+    command: usr/bin/png-version
