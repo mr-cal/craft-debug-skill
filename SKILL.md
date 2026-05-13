@@ -13,13 +13,7 @@ Craft apps (snapcraft, charmcraft, rockcraft, debcraft, imagecraft) share a comm
 
 ## Quick Reference
 
-| App | Project file | Log path |
-|-----|-------------|----------|
-| snapcraft | `snap/snapcraft.yaml`, `snapcraft.yaml`, `.snapcraft.yaml`, or `build-aux/snap/snapcraft.yaml` | `~/.local/state/snapcraft/log/` |
-| charmcraft | `charmcraft.yaml` | `~/.local/state/charmcraft/log/` |
-| rockcraft | `rockcraft.yaml` | `~/.local/state/rockcraft/log/` |
-| debcraft | `debcraft.yaml` | `~/.local/state/debcraft/log/` |
-| imagecraft | `imagecraft.yaml` | `~/.local/state/imagecraft/log/` |
+Log paths follow `~/.local/state/<app>/log/`. Project files follow `<app>.yaml`, except snapcraft which also checks `snap/snapcraft.yaml`, `.snapcraft.yaml`, and `build-aux/snap/snapcraft.yaml`.
 
 ## Build Provider
 
@@ -55,11 +49,14 @@ When a YAML validation error is unclear, fetch the schema and check the key's de
 All craft apps share this lifecycle (in order):
 
 ```
-pull → build → stage → prime → pack
+pull → [overlay] → build → stage → prime → pack
 ```
+
+The **overlay** step (between pull and build) is optional and only present in some apps (e.g. rockcraft). It modifies the base filesystem layer before the build step.
 
 Each step command runs all prior steps automatically:
 - `<app> pull [part-name]` — fetch sources
+- `<app> overlay [part-name]` — modify base filesystem layer (where supported)
 - `<app> build [part-name]` — compile/build
 - `<app> stage [part-name]` — collect into staging area
 - `<app> prime [part-name]` — prepare final contents
@@ -225,16 +222,18 @@ Failed to generate snap metadata: 'adopt-info' refers to part 'mypart', but that
 
 **Fix:** Add `parse-info` to the part, or use `craftctl set-version` in an override scriptlet.
 
-### Library linter warnings (prime step)
+### Linter warnings (prime step)
+
+Some apps run linters at the prime step. Warnings look like:
 
 ```
 Lint warnings:
-- library: libfoo.so.1: unused library
+- <linter>: <file>: <issue>
 ```
 
 **Fix options:**
-- Remove from `stage-packages` if truly unused
-- If dynamically loaded, add to `lint.ignore` to suppress false positive:
+- Address the underlying issue (e.g. add missing package, remove unused library)
+- Suppress a false positive with `lint.ignore`:
 ```yaml
 lint:
   ignore:
@@ -260,15 +259,13 @@ parts:
 
 ## App-Specific Notes
 
-**snapcraft (snaps):** Uses LXD or Multipass VM by default (see Build Provider section). Linters run at prime step.
-
-**charmcraft (charms):** Uses `charm` plugin for Python-based charms. The `charmcraft pack` command creates a `.charm` file.
-
-**rockcraft (OCI rocks):** Creates OCI images. Uses `ubuntu@XX.YY` base format. Output is a `.rock` file (OCI archive).
-
-**debcraft (deb packages):** Creates Debian packages. Project file is `debcraft.yaml`.
-
-**imagecraft:** Creates Ubuntu images. Inherits the same lifecycle and flags.
+| App | Output artifact |
+|-----|----------------|
+| snapcraft | `.snap` |
+| charmcraft | `.charm` |
+| rockcraft | `.rock` (OCI image archive) |
+| debcraft | `.deb` |
+| imagecraft | Ubuntu image |
 
 ## Example Iteration Session
 
