@@ -3,7 +3,7 @@ name: craft-debug
 description: Use when debugging failing builds of craft applications (snapcraft, charmcraft, rockcraft, debcraft, imagecraft), when a pack/build command errors, or when iterating on a project file to fix build failures.
 metadata:
   author: "@canonical/starcraft"
-  version: "0.1"
+  version: "0.2"
 ---
 
 # Debugging Craft App Builds
@@ -24,6 +24,13 @@ Log paths follow `~/.local/state/<app>/log/`. Project files follow `<app>.yaml`,
 | debcraft | `.deb` |
 | imagecraft | Ubuntu image |
 
+Each app's full documentation is at:
+- snapcraft: `https://documentation.ubuntu.com/snapcraft`
+- rockcraft: `https://documentation.ubuntu.com/rockcraft`
+- charmcraft: `https://documentation.ubuntu.com/charmcraft`
+
+For other apps, try `https://documentation.ubuntu.com/<app>`. Fetch pages from the docs site when you need deeper detail on a behaviour, option, or plugin.
+
 ## Gotchas
 
 - **The debug shell is inside the build environment**, not on the host. `--shell`, `--shell-after`, and `--debug` open a shell inside the LXD container or Multipass VM. Edit the project YAML on the host in a separate terminal, then re-run the craft app from inside the shell.
@@ -31,7 +38,9 @@ Log paths follow `~/.local/state/<app>/log/`. Project files follow `<app>.yaml`,
 - **Build state is cached between runs.** A part that succeeded previously won't re-run unless cleaned. This is usually good but can leave stale state during debugging. Do a final `clean` + `pack` once the build is confirmed working.
 - **The overlay step is only present in some apps** (e.g. rockcraft). Running `snapcraft overlay` will error.
 - **Never use `--destructive-mode` unless the user explicitly asks.** It modifies the host system directly and bypasses build isolation.
-- **Fix craft config, not source code.** Resolve failures by editing the craft YAML or craft-specific assets (e.g. `snap/hooks/`). Do **not** modify upstream source code. If the failure is clearly a bug in the source itself (i.e. it would fail to build outside of any craft context), tell the user what you found and ask whether they would like you to fix the source.
+- **Fix craft config, not source code.** Resolve failures by editing the craft YAML or craft-specific assets (e.g. `snap/hooks/`). Do **not** modify upstream source files — this includes application source, build system files (e.g. `CMakeLists.txt`, `Makefile`, `setup.py`, `pyproject.toml`), and any file committed to the upstream repo. If the only path forward is a source change (i.e. the project is genuinely broken outside any craft context), tell the user what you found and **ask before making any edits**.
+- **Exhaust craft YAML options before considering source changes.** The craft YAML has many levers — `build-packages`, `stage-packages`, `build-snaps`, additional parts (which can pull from any source type), `cmake-parameters`, `override-pull`/`override-build`/`override-prime` scriptlets, and `after` for ordering. When a build fails, work through these options systematically before concluding that a source file must change.
+- **Prep the build environment** If you need to build or add dependencies to get a part to work, consider using the `build-environment` key, other part keys, and plugin-specific keys that let the a part consume things that were built by the dependency parts.
 
 ## Build Provider
 
@@ -130,79 +139,12 @@ Once the build succeeds, do a clean rebuild to flush any stale state from debugg
 Issues while validating snapcraft.yaml: 'version' is a required property
 ```
 
-`version` is required unless using `adopt-info`. If the key/value is unclear, fetch the schema:
-- snapcraft: `https://raw.githubusercontent.com/canonical/snapcraft/main/schema/snapcraft.json`
-- charmcraft: `https://raw.githubusercontent.com/canonical/charmcraft/main/schema/charmcraft.json`
-- rockcraft: `https://raw.githubusercontent.com/canonical/rockcraft/main/schema/rockcraft.json`
+Validation errors are raised for missing required fields (e.g. `version`, `base`) and for invalid field values (e.g. a license string that is not a valid SPDX identifier). If the expected format is unclear, look up the project YAML reference for the app:
+- snapcraft: `https://documentation.ubuntu.com/snapcraft/stable/reference/snapcraft-yaml/`
+- rockcraft: `https://documentation.ubuntu.com/rockcraft/stable/reference/rockcraft-yaml/`
+- charmcraft: `https://documentation.ubuntu.com/charmcraft/stable/reference/files/charmcraft-yaml-file/`
 
-### Missing build dependency
-
-```
-Package libfoo-dev was not found in the pkg-config search path
-```
-
-Add to `build-packages` in the failing part:
-```yaml
-parts:
-  my-part:
-    build-packages:
-      - libfoo-dev
-```
-
-### Missing runtime library
-
-```
-Unable to find library: libfoo.so.1
-```
-
-Add to `stage-packages` in the failing part:
-```yaml
-parts:
-  my-part:
-    stage-packages:
-      - libfoo1
-```
-
-### Scriptlet command not found
-
-```
-+ not-a-real-command
-not-a-real-command: command not found
-```
-
-The command in `override-build`, `override-pull`, or `override-prime` is missing. Add it to `build-packages` or fix the scriptlet.
-
-### adopt-info missing parse-info
-
-```
-Failed to generate snap metadata: 'adopt-info' refers to part 'mypart', but that part is lacking the 'parse-info' property
-```
-
-Add `parse-info` to the part, or set version explicitly with `craftctl set-version` in an override scriptlet.
-
-### Linter warnings (prime step)
-
-```
-Lint warnings:
-- <linter>: <file>: <issue>
-```
-
-Either fix the underlying issue or suppress a false positive:
-```yaml
-lint:
-  ignore:
-    - library: libfoo.so.1
-```
-
-### Part ordering — file not found at build time
-
-If a part needs files from another part during build, use `after`:
-```yaml
-parts:
-  part-a:
-    after:
-      - part-b
-```
+For other apps, look for a similar reference page under the app's documentation site — the slug may differ.
 
 ## Example Session
 
