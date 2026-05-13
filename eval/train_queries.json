@@ -1,0 +1,14 @@
+[
+  { "query": "snapcraft pack is failing with some error about a missing package, can you help?", "should_trigger": true },
+  { "query": "my charmcraft build keeps erroring out at the build step, I don't know why", "should_trigger": true },
+  { "query": "I keep getting 'Package libfoo-dev was not found' when I run rockcraft", "should_trigger": true },
+  { "query": "help me fix my snap, the build fails at the prime step with a linter warning", "should_trigger": true },
+  { "query": "debcraft pack fails but the error message is confusing, can you look at it?", "should_trigger": true },
+  { "query": "my override-build scriptlet is failing and I can't figure out what's wrong", "should_trigger": true },
+  { "query": "imagecraft is erroring out when I try to build my Ubuntu image", "should_trigger": true },
+  { "query": "can you help me write a snapcraft.yaml for my Python app from scratch?", "should_trigger": false },
+  { "query": "what's the difference between stage-packages and build-packages?", "should_trigger": false },
+  { "query": "my Docker build fails with a missing dependency error", "should_trigger": false },
+  { "query": "how do I publish my snap to the Snap Store?", "should_trigger": false },
+  { "query": "can you explain how the craft build lifecycle works?", "should_trigger": false }
+]

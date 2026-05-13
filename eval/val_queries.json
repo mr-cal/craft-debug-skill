@@ -1,0 +1,10 @@
+[
+  { "query": "rockcraft is broken, something about a validation error in my rockcraft.yaml and I can't figure out which key is wrong", "should_trigger": true },
+  { "query": "I tried building my charm but LXD keeps failing, should I use multipass instead?", "should_trigger": true },
+  { "query": "snap build failing, not sure where to even start debugging", "should_trigger": true },
+  { "query": "my CI pipeline is failing on the build step", "should_trigger": false },
+  { "query": "how do I add a new part to my rockcraft.yaml?", "should_trigger": false },
+  { "query": "can you review my snapcraft.yaml for best practices?", "should_trigger": false },
+  { "query": "my pip install is failing with dependency conflicts", "should_trigger": false },
+  { "query": "how do I set up LXD on Ubuntu?", "should_trigger": false }
+]
