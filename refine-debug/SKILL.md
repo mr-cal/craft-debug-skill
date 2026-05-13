@@ -144,11 +144,10 @@ Follow these rules:
 
 ### Step 8 — Validate and re-test
 
-Run the validator:
+Run the validator (bundled with this skill):
 
 ```bash
-python3 /root/.agents/skills/generate-agent-skills/scripts/validate_skill.py \
-  --path .
+python3 refine-debug/scripts/validate_skill.py --path .
 ```
 
 Fix any reported errors. Then re-run the full test suite (Steps 3–4) against the updated
