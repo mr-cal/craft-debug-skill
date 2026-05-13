@@ -1,6 +1,9 @@
 ---
 name: craft-debug
 description: Use when debugging failing builds of craft applications (snapcraft, charmcraft, rockcraft, debcraft, imagecraft), when a pack/build command errors, or when iterating on a project file to fix build failures.
+metadata:
+  author: "@canonical/starcraft"
+  version: "0.1"
 ---
 
 # Debugging Craft App Builds
