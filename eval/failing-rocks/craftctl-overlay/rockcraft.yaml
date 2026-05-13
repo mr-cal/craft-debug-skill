@@ -1,0 +1,18 @@
+name: craftctl-overlay
+version: "1.0"
+summary: Rock using wrong craftctl verb in overlay step
+description: |
+  This rock uses 'craftctl build' in override-overlay, but 'craftctl default'
+  is the correct way to invoke the default step behavior.
+
+base: ubuntu@24.04
+
+platforms:
+  amd64:
+
+parts:
+  my-part:
+    plugin: nil
+    override-overlay: |
+      craftctl build
+      echo "This won't work"

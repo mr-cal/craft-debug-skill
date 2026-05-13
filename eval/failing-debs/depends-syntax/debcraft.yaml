@@ -1,0 +1,17 @@
+name: depends-syntax
+version: "1.0"
+summary: Package with malformed depends
+description: |
+  The depends field has invalid syntax.
+
+maintainer: Test User <test@example.com>
+
+packages:
+  depends-syntax:
+    depends:
+      - "libc6 >= 2.0"
+      - "invalid depends >>= syntax"
+
+parts:
+  my-part:
+    plugin: nil

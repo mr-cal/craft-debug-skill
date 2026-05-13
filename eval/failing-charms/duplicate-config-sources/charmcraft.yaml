@@ -1,0 +1,19 @@
+name: duplicate-config-sources
+type: charm
+summary: Charm with config in two places
+description: |
+  Has "config" section in charmcraft.yaml but also a separate config.yaml file.
+  Error: "Cannot specify 'config' section in 'charmcraft.yaml' when 'config.yaml' exists"
+
+base: ubuntu@24.04
+
+parts:
+  charm:
+    plugin: charm
+    source: .
+
+config:
+  options:
+    port:
+      type: int
+      default: 8080

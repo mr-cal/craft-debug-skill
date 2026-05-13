@@ -1,0 +1,13 @@
+name: dispatch-not-executable
+type: charm
+summary: Charm with non-executable entrypoint
+description: |
+  The dispatch file points to src/charm.py which exists but is not executable.
+  Linter error: "The entrypoint file is not executable: 'src/charm.py'"
+
+base: ubuntu@24.04
+
+parts:
+  charm:
+    plugin: charm
+    source: .

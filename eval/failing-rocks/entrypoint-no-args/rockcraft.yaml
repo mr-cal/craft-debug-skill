@@ -1,0 +1,25 @@
+name: entrypoint-no-args
+version: "1.0"
+summary: Rock with entrypoint-service but command has no default args
+description: |
+  entrypoint-service requires the service command to have optional default
+  arguments in [ square brackets ]. The command "/app/server" has none.
+  Error: "The Pebble service 'web' has a command /app/server without default
+  arguments and thus cannot be used as the entrypoint-service."
+
+base: ubuntu@24.04
+
+platforms:
+  amd64:
+
+entrypoint-service: web
+
+services:
+  web:
+    override: replace
+    command: /app/server
+    startup: enabled
+
+parts:
+  app:
+    plugin: nil

@@ -1,0 +1,12 @@
+name: missing-base
+version: "1.0"
+summary: Rock without a base field
+description: |
+  This rock is missing the required 'base' field.
+
+platforms:
+  amd64:
+
+parts:
+  my-part:
+    plugin: nil

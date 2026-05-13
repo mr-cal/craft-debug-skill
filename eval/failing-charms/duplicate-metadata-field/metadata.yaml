@@ -1,0 +1,3 @@
+name: duplicate-metadata-field
+summary: Different summary in metadata.yaml
+description: This will cause a duplicate field error

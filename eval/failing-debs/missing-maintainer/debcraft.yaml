@@ -1,0 +1,9 @@
+name: missing-maintainer
+version: "1.0"
+summary: Package without required maintainer field
+description: |
+  This package is missing the required maintainer field.
+
+parts:
+  my-part:
+    plugin: nil

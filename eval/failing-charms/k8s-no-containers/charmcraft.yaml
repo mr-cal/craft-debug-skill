@@ -1,0 +1,15 @@
+name: k8s-no-containers
+type: charm
+summary: K8s charm without containers defined
+description: |
+  This charm assumes k8s deployment but has no containers block.
+
+base: ubuntu@24.04
+
+parts:
+  charm:
+    plugin: charm
+    source: .
+
+assumes:
+  - k8s-api

@@ -1,0 +1,14 @@
+name: scriptlet-exit
+type: charm
+summary: Charm with failing scriptlet
+description: |
+  This charm has an override-build that exits with error.
+
+base: ubuntu@24.04
+
+parts:
+  charm:
+    plugin: charm
+    source: .
+    override-build: |
+      exit 1

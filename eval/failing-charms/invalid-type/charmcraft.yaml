@@ -1,0 +1,12 @@
+name: invalid-type
+type: application
+summary: A charm with an invalid type
+description: |
+  The type field must be "charm" or "bundle", not "application".
+
+base: ubuntu@24.04
+
+parts:
+  charm:
+    plugin: charm
+    source: .

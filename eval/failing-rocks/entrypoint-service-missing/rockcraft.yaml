@@ -1,0 +1,23 @@
+name: entrypoint-service-missing
+version: "1.0"
+summary: Rock with entrypoint-service referencing non-existent service
+description: |
+  entrypoint-service references "web" but only "api" is defined in services.
+  Error: "The provided entrypoint-service 'web' is not a valid Pebble service."
+
+base: ubuntu@24.04
+
+platforms:
+  amd64:
+
+entrypoint-service: web
+
+services:
+  api:
+    override: replace
+    command: /app/api [ --port 8080 ]
+    startup: enabled
+
+parts:
+  app:
+    plugin: nil

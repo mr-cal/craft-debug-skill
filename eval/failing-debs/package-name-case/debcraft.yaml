@@ -1,0 +1,17 @@
+name: my-package
+version: "1.0"  
+summary: Package with uppercase in packages dict key
+description: |
+  Debian package names must be lowercase. Using uppercase in the 
+  packages dict key will fail validation.
+
+maintainer: Test User <test@example.com>
+
+packages:
+  My-Package:
+    summary: This key name has uppercase
+
+parts:
+  my-app:
+    plugin: nil
+    source: .
