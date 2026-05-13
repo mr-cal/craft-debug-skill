@@ -1,0 +1,15 @@
+name: legacy-scriptlet-snap
+base: core22
+version: "0.1"
+summary: Snap that uses snapcraftctl in an override-build script
+description: |
+  Uses an override-build script to drive the build lifecycle.
+
+grade: devel
+confinement: strict
+
+parts:
+  my-part:
+    plugin: nil
+    override-build: |
+      snapcraftctl build

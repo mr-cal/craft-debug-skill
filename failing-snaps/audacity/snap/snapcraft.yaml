@@ -1,0 +1,254 @@
+name: audacity
+adopt-info: audacity
+description: |
+  Audacity® is a free, easy-to-use, multi-track audio editor and recorder for Windows,
+  Mac OS X, GNU/Linux and other operating systems. The interface is translated into
+  many languages.
+
+  You can use Audacity to:
+  * Record live audio
+  * Convert tapes and records into digital recordings or CDs
+  * Edit WAV, AIFF, FLAC, MP2, MP3 or Ogg Vorbis sound files
+  * Cut, copy, splice or mix sounds together
+  * Change the speed or pitch of a recording
+  * Apply a wide range of other effects to audio recordings
+
+grade: stable
+confinement: strict
+base: core20
+compression: lzo
+
+architectures:
+  - build-on: amd64
+  - build-on: armhf
+  - build-on: arm64
+
+layout:
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib:
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib
+  /usr/lib/x86_64-linux-gnu/audacity:
+    bind: $SNAP/usr/lib/x86_64-linux-gnu/audacity
+  /usr/share/alsa:
+    bind: $SNAP/usr/share/alsa
+  /usr/share/audacity:
+    bind: $SNAP/usr/share/audacity
+  /usr/share/locale:
+    bind: $SNAP/usr/share/locale
+
+plugs:
+  gtk-2-engines:
+    interface: content
+    target: $SNAP/lib/gtk-2.0
+    default-provider: gtk2-common-themes:gtk-2-engines
+  gtk-2-themes:
+    interface: content
+    target: $SNAP/data-dir/themes
+    default-provider: gtk-common-themes:gtk-2-themes
+  sound-themes:
+    interface: content
+    target: $SNAP/data-dir/sounds
+    default-provider: gtk-common-themes:sound-themes
+  icon-themes:
+    interface: content
+    target: $SNAP/data-dir/icons
+    default-provider: gtk-common-themes:icon-themes
+
+environment:
+  GTK_PATH: $SNAP/lib/gtk-2.0
+  LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/alsa-lib
+  XDG_DATA_DIRS: $SNAP/data-dir:$SNAP/usr/share:$XDG_DATA_DIRS
+
+apps:
+  audacity:
+    command: usr/audacity
+    # extensions: [gnome-3-28]
+    command-chain:
+    - bin/desktop-launch
+    - snap/command-chain/alsa-launch
+    desktop: usr/share/applications/audacity.desktop
+    common-id: org.audacityteam.Audacity
+    plugs:
+      - alsa
+      - audio-playback
+      - audio-record
+      - desktop
+      - desktop-legacy
+      - gsettings
+      - home
+      - jack1
+      - network
+      - network-bind
+      - pulseaudio
+      - removable-media
+      - unity7
+      - wayland
+      - x11
+
+parts:
+  desktop-gtk2:
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: gtk
+    plugin: make
+    make-parameters: ["FLAVOR=gtk2"]
+    build-packages:
+      - libgtk2.0-dev
+    stage-packages:
+      - libxkbcommon0  # XKB_CONFIG_ROOT
+      - ttf-ubuntu-font-family
+      - dmz-cursor-theme
+      - light-themes
+      - adwaita-icon-theme
+      - gnome-themes-standard
+      - shared-mime-info
+      - libatk-adaptor
+      - libcanberra-gtk-module
+      - libgail-common
+      - libgtk2.0-0
+      - libgdk-pixbuf2.0-0
+      - libglib2.0-bin
+      - libgtk2.0-bin
+      - unity-gtk2-module
+      - libappindicator1
+      - locales-all
+      - ibus-gtk
+      - libibus-1.0-5
+      - appmenu-gtk2-module
+
+  alsa-mixin:
+    plugin: dump
+    source: https://github.com/diddlesnaps/snapcraft-alsa.git
+    source-subdir: snapcraft-assets
+    build-packages:
+      - libasound2-dev
+    stage-packages:
+      - libasound2
+      - libasound2-plugins
+      - yad
+
+  audacity:
+    after: [alsa-mixin, desktop-gtk2]
+    plugin: cmake
+    source: https://github.com/audacity/audacity.git
+    parse-info: [usr/share/metainfo/audacity.appdata.xml]
+    override-pull: |
+      rm -f /usr/bin/cc /usr/bin/c++
+      pip3 install conan
+      snapcraftctl pull
+      last_committed_tag="$(git describe --tags --abbrev=0)"
+      last_released_tag="$(snap info $SNAPCRAFT_PROJECT_NAME | awk '$1 == "beta:" { print $2 }' || echo "unknown")"
+      # If the latest tag from the upstream project has not been released to
+      # beta, build that tag instead of master.
+      if [ "${last_committed_tag}" != "${last_released_tag}" ]; then
+        git fetch
+        git checkout "${last_committed_tag}"
+        snapcraftctl set-version "$(echo "${last_committed_tag}" | sed -E -e "s|^$SNAPCRAFT_PROJECT_NAME-?||i")"
+      else
+        snapcraftctl set-version "$(git rev-parse --short HEAD)"
+      fi
+      sed -i -E 's|Icon=.*|Icon=/usr/share/icons/hicolor/scalable/apps/audacity.svg|' src/audacity.desktop.in
+      sed -i -E 's|Exec=env UBUNTU_MENUPROXY=0 |Exec=|' src/audacity.desktop.in
+      git show -s --format="#define REV_LONG \"%H\"%n#define REV_TIME \"%cd\"%n" | tee src/RevisionIdent.h
+    cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/usr
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DAUDACITY_BUILD_LEVEL=2
+      - -Daudacity_has_networking=Off
+      - -Daudacity_has_sentry_reporting=Off
+      - -Daudacity_has_crashreports=Off
+      - -Daudacity_has_updates_check=Off
+      - -Daudacity_use_ffmpeg=loaded
+    build-snaps:
+      - cmake
+    build-environment:
+      - PATH: /snap/bin:$PATH
+      - CFLAGS: -O2 -pipe
+      - CXXFLAGS: -O2 -pipe
+    build-packages:
+      - build-essential
+      - libavcodec-dev
+      - libavformat-dev
+      - libavutil-dev
+      - libgstreamer-plugins-base1.0-dev
+      - libgstreamer-plugins-good1.0-dev
+      - libgstreamer1.0-dev
+      - libid3tag0-dev
+      - libjack-jackd2-dev
+      - libmad0-dev
+      - libmp3lame-dev
+      - libpulse-dev
+      - libsoundtouch-dev
+      - libsoxr-dev
+      - libtwolame-dev
+      - python3-pip
+      - uuid-dev
+      - nasm
+    stage-packages:
+      - libavcodec58
+      - libavformat58
+      - libavutil56
+      - libgstreamer-plugins-base1.0-0
+      - libgstreamer-plugins-good1.0-0
+      - libgstreamer1.0-0
+      - libid3tag0
+      - libjack-jackd2-0
+      - libmad0
+      - libmp3lame0
+      - libogg0
+      - libpulse0
+      - libsoundtouch1
+      - libsoxr0
+      - libtwolame0
+      - libuuid1
+    # organize:
+    #   snap/audacity/current/usr: usr
+    prime:
+      - -snap/audacity
+
+  gtk-locales:
+    plugin: nil
+    build-packages:
+    - apt
+    - dpkg
+    override-pull: |
+      set -eux
+      apt download "language-pack-gnome-*-base"
+    override-build: |
+      set -eux
+      for deb in *.deb; do dpkg-deb -x $deb .; done
+      find usr/share/locale-langpack -type f -not -name "gtk20*.mo" -exec rm '{}' \;
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share
+      cp -R usr/share/locale-langpack $SNAPCRAFT_PART_INSTALL/usr/share/
+
+  # Ship a default set of GSettings schemas so that the correct theme is used
+  # in Wayland sessions on Ubuntu (see https://forum.snapcraft.io/t/7806/3).
+  desktop-settings-packages:
+    after: [ desktop-gtk2 ]
+    plugin: nil
+    build-packages:
+    - libglib2.0-bin
+    stage-packages:
+    - gsettings-desktop-schemas
+    - ubuntu-settings
+    prime:
+    - usr/share/glib-2.0/schemas/*
+
+  desktop-settings-build:
+    plugin: nil
+    after: [ audacity, desktop-settings-packages ]
+    override-prime: |
+      set -eux
+      glib-compile-schemas usr/share/glib-2.0/schemas
+
+  cleanup:
+    after: [ audacity, desktop-settings-build ]
+    plugin: nil
+    build-snaps:
+    - core20
+    - gtk-common-themes
+    - gtk2-common-themes
+    override-prime: |
+      set -eux
+      cd /snap/gtk-common-themes/current
+      find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/usr/{} \;
+      cd /snap/gtk2-common-themes/current/lib
+      find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/{} \;

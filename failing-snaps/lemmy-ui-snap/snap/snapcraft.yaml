@@ -1,0 +1,19 @@
+name: lemmy-ui-snap
+version: "0.1"
+base: core20
+summary: Lemmy web UI snap
+description: |
+  Packages the Lemmy web UI using the npm plugin.
+
+grade: devel
+confinement: strict
+
+parts:
+  ui:
+    plugin: npm
+    source: https://github.com/lemmynet/lemmy-ui.git
+    npm-node-version: "14.13.0"
+
+apps:
+  lemmy-ui:
+    command: bin/lemmy-ui
